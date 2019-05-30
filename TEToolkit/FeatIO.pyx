@@ -544,7 +544,7 @@ class FWTrackII:
                 return self.__minuscounts[chromosome]
             else:
                 #raise Exception("No such chromosome name (%s) in TrackI object!\n" % (chromosome))
-		return tmp;
+                return tmp;
        
     def get_chr_names (self):
         """Return all the chromosome names stored in this track object.

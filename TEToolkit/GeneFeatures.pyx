@@ -30,9 +30,9 @@ class GFF_Reader( ):
    Yields tuple of (gene_id,chrom,strand,start position,end position,type)
 
    """
-
+   
    def __init__( self, filename, id_attribute):
-      self.line_no = None
+      self.line_no = -1
       self.filename = filename
       self.id_attribute = id_attribute
       self._re_attr_main = re.compile( "\s*([^\s\=]+)[\s=]+(.*)" )
@@ -43,7 +43,6 @@ class GFF_Reader( ):
             lines = gzip.open( self.filename )
       else:
             lines = open( self.filename )
-
       for line in lines:
           self.line_no += 1
           if line == "\n" or line.startswith('#'):
@@ -54,7 +53,7 @@ class GFF_Reader( ):
           yield (id, seqname, strand, int(start), int(end), feature)
 
       lines.close()
-      self.line_no = None
+      self.line_no = -1
 
    def __parse_GFF_attr_string(self,attributeStr,id_interested) :
 
@@ -72,7 +71,7 @@ class GFF_Reader( ):
        return None
 
    def get_line_number_string( self ):
-      if self.line_no is None:
+      if self.line_no < 0:
             return "file %s closed" % self.filename
 
       else:
@@ -102,8 +101,8 @@ class GeneFeatures:
 
         # read count of features in GTF file
         gff = GFF_Reader(gff_filename,id_attribute)  # (id, seqname, strand, int(start), int(end), feature)
-        i = 0
-        counts = 0
+        cdef int i = 0
+        cdef int counts = 0
         try:
             for f in gff:
                 if f[0] is None :

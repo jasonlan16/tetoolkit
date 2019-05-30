@@ -24,8 +24,9 @@ import operator
 
 from TEToolkit.Constants import *
 
+
 def normalizeMeans(meansIn):
-    total = sum(meansIn)
+    cdef float total = sum(meansIn)
     meansOut = [0]*len(meansIn)
     sys.stderr.write("total means = " + str(total) +"\n")    
     if total > 0 :
@@ -36,13 +37,15 @@ def normalizeMeans(meansIn):
     #sys.stderr.write("after normalization total means = "+str(sum(meansOut))+"\n")
     return meansOut
     
-def EMUpdate(meansIn, te_features,uniq_counts,multi_reads,estimatedReadLength):
+def EMUpdate(meansIn, te_features, uniq_counts, multi_reads, int estimatedReadLength):
+    cdef int tid, tlen, effectiveLength
+
     # reassign multi-reads proportionally to the relative abundance of each TE  
     te_counts = {}
     meansOut = [0] *len(meansIn)
 
     multi_counts = computeAbundances(meansIn,multi_reads)    
-    sys.stderr.write("total multi counts = "+ str(sum(multi_counts))+"\n")   
+    #sys.stderr.write("total multi counts = "+ str(sum(multi_counts))+"\n")   
     for tid in range(len(meansIn)) :
         tlen = te_features.getLength(tid)
         if tlen <0 :
@@ -88,6 +91,9 @@ def logLikelihood_(means) :
     return 2 #sum_(likelihoods)
     
 def expectedLogLikelihood_(means, counts, te_features) :
+    cdef int tid
+    cdef float relativeAbundance
+
     sampProbs = [0.0]*len(means)
     
     for tid in range(len(counts)) : 
@@ -102,22 +108,22 @@ def expectedLogLikelihood_(means, counts, te_features) :
         return 0.0
   
 def absdiff_(v0, v1) :
-    diff = 0.0
+    cdef float diff = 0.0
     #for i in range(len(v0)) :
     #    diff += math.fabs(v0[i]-v1[i])
     diff = sum(map(lambda x,y: abs(x-y),v0,v1))
     return diff
 
 def dotProd_(u, v) :
-    dot = 0.0
-    dot = sum(map(operator.mul,u,v))
+    cdef float dot = sum(map(operator.mul,u,v))
     #for i in range(len(u)) :
     #    dot += u[i] * v[i]
     
     return dot
         
 
-def EMestimate(te_features,multi_reads,uniq_counts,multi_counts,numItr,estimatedReadLength):
+def EMestimate(te_features,multi_reads, uniq_counts, multi_counts, int numItr, int estimatedReadLength):
+    cdef int tid, tlen, effectiveLength
     
     #estimate average read length
    # estimatedReadLength = averageReadLength(multi_reads)
@@ -148,28 +154,31 @@ def EMestimate(te_features,multi_reads,uniq_counts,multi_counts,numItr,estimated
          * [SQUAREM](http://cran.r-project.org/web/packages/SQUAREM/index.html).
          */
     '''
-    minStep0 = 1.0
-    minStep = 1.0
-    maxStep0 = 1.0
-    maxStep = 1.0
-    mStep = 4.0
-    nonMonotonicity = 1.0
-    negLogLikelihoodOld = float("inf")
-    negLogLikelihoodNew = float("inf")
+    cdef float minStep0 = 1.0
+    cdef float minStep = 1.0
+    cdef float maxStep0 = 1.0
+    cdef float maxStep = 1.0
+    cdef float mStep = 4.0
+    cdef float nonMonotonicity = 1.0
+    cdef float negLogLikelihoodOld = float("inf")
+    cdef float negLogLikelihoodNew = float("inf")
     # Right now, the # of iterations is fixed, but termination should
     # also be based on tolerance
     
     #while feval < numItr :
-    cur_iter = 0
+    cdef int cur_iter = 0
     #for iter in range(0,numItr) :
-    t_size = len(uniq_counts)
+    cdef int t_size = len(uniq_counts)
     r = [0]*t_size
     r2 = [0] * t_size
     v = [0]*t_size
     meansPrime = [0.0] * t_size
     #means2 = [0.0] * t_size
     #means1 = [0.0] * t_size
-    outerIteration = 1
+    cdef int outerIteration = 1
+
+    cdef float rNorm, r2Norm, vNorm, rr, rvNorm, alphaS
+
     while cur_iter < numItr :
         cur_iter += 1
         sys.stderr.write("SQUAREM iteraton [" + str(cur_iter) + "]\n")
@@ -247,11 +256,11 @@ def EMestimate(te_features,multi_reads,uniq_counts,multi_counts,numItr,estimated
             #    sys.stderr.write("......in nonMonotonicity 3.......\n")
             #    meansPrime, means2 = means2, meansPrime
             #    negLogLikelihoodNew = - 1.0 * expectedLogLikelihood_(meansPrime)
-                
+            ''' Jason Note: The block's indent is either not correct or should be commented out    
                 if alphaS == maxStep :
                     maxStep = max(maxStep0, maxStep/mStep)
                     alphaS = 1.0
-                
+            '''   
         sys.stderr.write("alpha = " + str(alphaS) + ", ")
         
         if alphaS == maxStep :
@@ -272,12 +281,14 @@ def EMestimate(te_features,multi_reads,uniq_counts,multi_counts,numItr,estimated
     new_multi_counts = computeAbundances(means0,multi_reads)
     return new_multi_counts
 
-def computeAbundances(meansIn,multi_reads):
+def computeAbundances(meansIn, multi_reads):
         
-    size = len(meansIn)
+    cdef int size = len(meansIn)
     multi_counts = [0] * size
     
     sys.stderr.write("num of multi reads = "+str(len(multi_reads))+"\n")
+    cdef int kid, tid
+    cdef float totalMass, norm
     for kid in range(len(multi_reads)) :
         TE_transcripts = multi_reads[kid]
         totalMass = 0.0

@@ -6,7 +6,7 @@ import operator
 class IntervalTree(object):
     __slots__ = ('intervals', 'left', 'right', 'center')
 
-    def __init__(self, intervals, depth=16, minbucket=16, _extent=None, maxbucket=512):
+    def __init__(self, intervals, int depth=16, int minbucket=16, _extent=None, int maxbucket=512):
         """\
         `intervals` a list of intervals *with start and stop* attributes.
         `depth`     the depth of the tree
@@ -53,6 +53,7 @@ class IntervalTree(object):
             # better performance in searching later.
             intervals.sort(key=operator.attrgetter('start'))
 
+        cdef left, right, center
         left, right = _extent or \
                (intervals[0].start, max(i.stop for i in intervals))
         #center = intervals[len(intervals)/ 2].stop
@@ -76,7 +77,7 @@ class IntervalTree(object):
         self.center = center
  
  
-    def find(self, start, stop):
+    def find(self, int start, int stop):
         """find all elements between (or overlapping) start and stop"""
         if self.intervals and not stop < self.intervals[0].start:
             overlapping = [i for i in self.intervals if i.stop >= start 
@@ -92,7 +93,7 @@ class IntervalTree(object):
 
         return overlapping
 
-    def find_gene(self, start, stop):
+    def find_gene(self, int start, int stop):
         """find all elements between (or overlapping) start and stop"""
         if self.intervals and not stop < self.intervals[0].start:
             overlapping = [i.gene for i in self.intervals if i.stop >= start 
@@ -130,7 +131,7 @@ class IntervalTree(object):
 
 class Interval(object):
     #__slots__ = ('start', 'stop')
-    def __init__(self, gene_id, start, stop):
+    def __init__(self, gene_id, int start, int stop):
         self.start = start
         self.stop  = stop
         self.gene = gene_id

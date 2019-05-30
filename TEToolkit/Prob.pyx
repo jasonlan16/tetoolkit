@@ -22,37 +22,38 @@ from math import log
 # ------------------------------------
 # constants
 # ------------------------------------
-LSTEP = 200
-EXPTHRES = exp(LSTEP)
-EXPSTEP  = exp(-LSTEP)
+cdef int LSTEP = 200
+cdef float EXPTHRES = exp(LSTEP)
+cdef float EXPSTEP  = exp(-LSTEP)
 # ------------------------------------
 # Misc functions
 # ------------------------------------
 
 import math
 
-def normal_01_cdf ( x ):
+def normal_01_cdf ( float x ):
     """NORMAL_01_CDF evaluates the Normal 01 CDF.
     """
-    a1 = 0.398942280444
-    a2 = 0.399903438504
-    a3 = 5.75885480458
-    a4 = 29.8213557808
-    a5 = 2.62433121679
-    a6 = 48.6959930692
-    a7 = 5.92885724438
-    b0 = 0.398942280385
-    b1 = 3.8052E-08
-    b2 = 1.00000615302
-    b3 = 3.98064794E-04
-    b4 = 1.98615381364
-    b5 = 0.151679116635
-    b6 = 5.29330324926
-    b7 = 4.8385912808
-    b8 = 15.1508972451
-    b9 = 0.742380924027
-    b10 = 30.789933034
-    b11 = 3.99019417011
+    cdef float a1 = 0.398942280444
+    cdef float a2 = 0.399903438504
+    cdef float a3 = 5.75885480458
+    cdef float a4 = 29.8213557808
+    cdef float a5 = 2.62433121679
+    cdef float a6 = 48.6959930692
+    cdef float a7 = 5.92885724438
+    cdef float b0 = 0.398942280385
+    cdef float b1 = 3.8052E-08
+    cdef float b2 = 1.00000615302
+    cdef float b3 = 3.98064794E-04
+    cdef float b4 = 1.98615381364
+    cdef float b5 = 0.151679116635
+    cdef float b6 = 5.29330324926
+    cdef float b7 = 4.8385912808
+    cdef float b8 = 15.1508972451
+    cdef float b9 = 0.742380924027
+    cdef float b10 = 30.789933034
+    cdef float b11 = 3.99019417011
+    cdef float y, q, cdf
 
     if abs ( x ) <= 1.28:
         y = 0.5 * x * x
@@ -78,31 +79,31 @@ def normal_01_cdf ( x ):
 
     return cdf
 
-def normal_cdf_inv(p, mu = None, sigma2 = None, lower=True):
+def normal_cdf_inv(float p, mu = None, sigma2 = None, lower=True):
+    
+    cdef float split = 0.42
+    cdef float a0 = 2.50662823884
+    cdef float a1 = -18.61500062529
+    cdef float a2 = 41.39119773534
+    cdef float a3 = -25.44106049637
+    cdef float b1 = -8.47351093090
+    cdef float b2 = 23.08336743743
+    cdef float b3 = -21.06224101826
+    cdef float b4 = 3.13082909833
+    cdef float c0 = -2.78718931138
+    cdef float c1 = -2.29796479134
+    cdef float c2 = 4.85014127135
+    cdef float c3 = 2.32121276858
+    cdef float d1 = 3.54388924762
+    cdef float d2 = 1.63706781897
+    cdef float q = p - 0.5
+    
+    cdef float r = 0.0
+    cdef float ppnd = 0.0
 
     upper = not lower
     if p < 0 or p > 1:
         raise Exception("Illegal argument %f for qnorm(p)." % p)
-    
-    split = 0.42
-    a0 = 2.50662823884
-    a1 = -18.61500062529
-    a2 = 41.39119773534
-    a3 = -25.44106049637
-    b1 = -8.47351093090
-    b2 = 23.08336743743
-    b3 = -21.06224101826
-    b4 = 3.13082909833
-    c0 = -2.78718931138
-    c1 = -2.29796479134
-    c2 = 4.85014127135
-    c3 = 2.32121276858
-    d1 = 3.54388924762
-    d2 = 1.63706781897
-    q = p - 0.5
-    
-    r = 0.0
-    ppnd = 0.0
     
     if abs(q) <= split:
         r = q * q
@@ -129,37 +130,39 @@ def normal_cdf_inv(p, mu = None, sigma2 = None, lower=True):
     else:
         return ppnd
 
-def normal_cdf (z, mu = 0.0, sigma2 = 1.0, lower=True):
+def normal_cdf (float z, float mu = 0.0, float sigma2 = 1.0, lower=True):
     
+    
+    
+    cdef float ltone = 7.0
+    cdef float utzero = 18.66
+    cdef float con = 1.28
+    cdef float a1 = 0.398942280444
+    cdef float a2 = 0.399903438504
+    cdef float a3 = 5.75885480458
+    cdef float a4 = 29.8213557808
+    cdef float a5 = 2.62433121679
+    cdef float a6 = 48.6959930692
+    cdef float a7 = 5.92885724438
+    cdef float b1 = 0.398942280385
+    cdef float b2 = 3.8052e-8
+    cdef float b3 = 1.00000615302
+    cdef float b4 = 3.98064794e-4
+    cdef float b5 = 1.986153813664
+    cdef float b6 = 0.151679116635
+    cdef float b7 = 5.29330324926
+    cdef float b8 = 4.8385912808
+    cdef float b9 = 15.1508972451
+    cdef float b10 = 0.742380924027
+    cdef float b11 = 30.789933034
+    cdef float b12 = 3.99019417011
+
+    cdef float y = 0.0
+    cdef float alnorm = 0.0
+
     upper = not lower
 
     z = (z - mu) / math.sqrt(sigma2)
-    
-    ltone = 7.0
-    utzero = 18.66
-    con = 1.28
-    a1 = 0.398942280444
-    a2 = 0.399903438504
-    a3 = 5.75885480458
-    a4 = 29.8213557808
-    a5 = 2.62433121679
-    a6 = 48.6959930692
-    a7 = 5.92885724438
-    b1 = 0.398942280385
-    b2 = 3.8052e-8
-    b3 = 1.00000615302
-    b4 = 3.98064794e-4
-    b5 = 1.986153813664
-    b6 = 0.151679116635
-    b7 = 5.29330324926
-    b8 = 4.8385912808
-    b9 = 15.1508972451
-    b10 = 0.742380924027
-    b11 = 30.789933034
-    b12 = 3.99019417011
-
-    y = 0.0
-    alnorm = 0.0
     
     if z < 0:
         upper = not upper
@@ -177,7 +180,7 @@ def normal_cdf (z, mu = 0.0, sigma2 = 1.0, lower=True):
         alnorm = 1.0 - alnorm
     return alnorm
 
-def poisson_cdf (n, lam,lower=True):
+def poisson_cdf (float n, float lam,lower=True):
     """Poisson CDF evaluater.
 
     This is a more stable CDF function. It can tolerate large lambda
@@ -189,7 +192,7 @@ def poisson_cdf (n, lam,lower=True):
     lam   : lambda of poisson distribution
     lower : if lower is False, calculate the upper tail CDF
     """
-    k = int(n)
+    cdef int k = int(n)
     if lam <= 0.0:
         raise Exception("Lambda must > 0")
 
@@ -204,11 +207,14 @@ def poisson_cdf (n, lam,lower=True):
         else:
             return __poisson_cdf_Q(k,lam)
 
-def __poisson_cdf (k,a):
+def __poisson_cdf (int k, float a):
     """Poisson CDF For small lambda. If a > 745, this will return
     incorrect result.
 
     """
+    cdef float next, last, cdf
+    cdef int i
+
     if k < 0:
         return 0                        # special cases
     next = exp( -a )
@@ -222,14 +228,17 @@ def __poisson_cdf (k,a):
     else:
         return cdf
     
-def __poisson_cdf_large_lambda ( k,a ):
+def __poisson_cdf_large_lambda ( int k, float a ):
     """Slower poisson cdf for large lambda.
     
     """
+    cdef int num_parts, last_part, i
+    cdef float lastexp, cdf, next, last
+
     if k < 0:
         return 0                        # special cases
     num_parts = int(a/LSTEP)
-    last_part = a % LSTEP
+    last_part = int(a % LSTEP)
     lastexp = exp(-last_part)
     next = EXPSTEP
     num_parts -= 1
@@ -252,11 +261,14 @@ def __poisson_cdf_large_lambda ( k,a ):
     cdf *= lastexp
     return cdf
 
-def __poisson_cdf_Q (k,a):
+def __poisson_cdf_Q (int k, float a):
     """internal Poisson CDF evaluater for upper tail with small
     lambda.
 
     """
+    cdef int i
+    cdef float cdf, next, last
+
     if k < 0:
         return 1                        # special cases
     next = exp( -a )
@@ -274,15 +286,18 @@ def __poisson_cdf_Q (k,a):
         i+=1
     return cdf
 
-def __poisson_cdf_Q_large_lambda (k,a):
+def __poisson_cdf_Q_large_lambda (int k, float a):
     """Slower internal Poisson CDF evaluater for upper tail with large
     lambda.
     
     """
+    cdef int num_parts, last_part, i
+    cdef float lastexp, cdf, next, last
+
     if k < 0:
         return 1                        # special cases
     num_parts = int(a/LSTEP)
-    last_part = a % LSTEP
+    last_part = int(a % LSTEP)
     lastexp = exp(-last_part)
     next = EXPSTEP
     num_parts -= 1
@@ -318,7 +333,7 @@ def __poisson_cdf_Q_large_lambda (k,a):
     cdf *= lastexp
     return cdf
 
-def poisson_cdf_inv ( cdf, lam, maximum=1000):
+def poisson_cdf_inv ( float cdf, float lam, int maximum=1000):
     """inverse poisson distribution.
 
     cdf : the CDF
@@ -327,6 +342,9 @@ def poisson_cdf_inv ( cdf, lam, maximum=1000):
     note: maxmimum return value is 1000
     and lambda must be smaller than 740.
     """
+    cdef float sum2, newval, sumold, last
+    cdef int i
+
     assert lam < 740
     if cdf < 0 or cdf > 1:
         raise Exception ("CDF must >= 0 and <= 1")
@@ -354,7 +372,7 @@ def poisson_cdf_inv ( cdf, lam, maximum=1000):
     
     return maximum
 
-def poisson_cdf_Q_inv ( cdf, lam, maximum=1000):
+def poisson_cdf_Q_inv ( float cdf, float lam, int maximum=1000):
     """inverse poisson distribution.
 
     cdf : the CDF
@@ -363,6 +381,9 @@ def poisson_cdf_Q_inv ( cdf, lam, maximum=1000):
     note: maxmimum return value is 1000
     and lambda must be smaller than 740.
     """
+    cdef float sum2, newval, sumold, last
+    cdef int i
+
     assert lam < 740
     if cdf < 0 or cdf > 1:
         raise Exception ("CDF must >= 0 and <= 1")
@@ -382,7 +403,7 @@ def poisson_cdf_Q_inv ( cdf, lam, maximum=1000):
     
     return maximum
 
-def poisson_pdf ( k, a ):
+def poisson_pdf ( int k, float a ):
     """Poisson PDF.
 
     PDF(K,A) is the probability that the number of events observed in
@@ -394,12 +415,14 @@ def poisson_pdf ( k, a ):
     return exp(-a) * pow (a, k) / factorial (k)
     
 
-def binomial_coef (n,k):
+def binomial_coef (int n, int k):
     """BINOMIAL_COEF computes the Binomial coefficient C(N,K)
 
     n,k are integers.
     """
-    mn = min (k, n-k)
+    cdef int mx, i
+    cdef float cnk
+    cdef int mn = min (k, n-k)
     if mn < 0:
         return 0
     elif mn == 0:
@@ -411,7 +434,7 @@ def binomial_coef (n,k):
             cnk = cnk * (mx+i) / i
     return cnk
 
-def binomial_cdf (x, a, b, lower=True):
+def binomial_cdf (int x, int a, int b, lower=True):
     """ BINOMIAL_CDF compute the binomial CDF.
 
     CDF(x)(A,B) is the probability of at most X successes in A trials,
@@ -422,7 +445,10 @@ def binomial_cdf (x, a, b, lower=True):
     else:
         return _binomial_cdf_r (x,a,b)
 
-def _binomial_cdf_r (x,a,b):
+def _binomial_cdf_r (int x, int a, int b):
+    cdef int argmax, i
+    cdef float cdf, pdf, seedpdf
+    
     if x < 0:
         return 1
     elif a < x:
@@ -469,7 +495,10 @@ def _binomial_cdf_r (x,a,b):
 
 
 
-def _binomial_cdf_f (x,a,b):
+def _binomial_cdf_f (int x,int a,int b):
+    cdef int argmax, i
+    cdef float seedpdf, pdf, cdf
+
     if x < 0:
         return 0
     elif a < x:
@@ -509,10 +538,13 @@ def _binomial_cdf_f (x,a,b):
             return cdf
 
 
-def binomial_cdf_inv ( cdf, a, b ):
+def binomial_cdf_inv ( float cdf, int a, int b ):
     """BINOMIAL_CDF_INV inverts the binomial CDF.
 
     """
+    cdef int x
+    cdef float cdf2, pdf
+
     if cdf < 0 or cdf >1:
         raise Exception("CDF must >= 0 or <= 1")
     cdf2 = 0
@@ -525,11 +557,14 @@ def binomial_cdf_inv ( cdf, a, b ):
     return x
 
     
-def binomial_pdf( x, a, b):
+def binomial_pdf( int x, int a, int b):
     """binomial PDF by H. Gene Shin
     
     """
-    
+
+    cdef int p, mn, mx, t, q, i
+    cdef float pdf    
+
     if a<1:
         return 0
     elif x<0 or a<x:
@@ -570,10 +605,12 @@ def binomial_pdf( x, a, b):
         pdf=float("%.10e" %pdf)
         return pdf
 
-def facotrial (n):
+def factorial (int n):
     """N!.
     
     """
+    cdef int i, fact
+
     if n < 0:
         return 0
     fact = 1

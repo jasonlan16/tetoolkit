@@ -15,12 +15,12 @@ with the distribution).
 import sys, time
 import logging
 from math import ceil,floor
-from TEToolkit.Constants import TEindex_BINSIZE
+#from TEToolkit.Constants import TEindex_BINSIZE
 
-#TEindex_BINSIZE = 200
+cdef int TEindex_BINSIZE = 500
 sys.setrecursionlimit(10000)
 class Node :
-    def __init__(self,start=-1,end=-1,name=-1,parent=None,left=None,right=None):
+    def __init__(self,int start=-1,int end=-1,int name=-1,parent=None,left=None,right=None):
         self.__start = start
         self.__end = end
      #   self.binstart = binstart
@@ -34,7 +34,7 @@ class Node :
         self.isroot = False
         self.add(start,end,name)
 
-    def add(self,start,end,name) :
+    def add(self,int start,int end,int name) :
         if start in self.__namelist :
             self.__namelist[start].append((name,end))
         else :
@@ -50,20 +50,21 @@ class Node :
         return  self.parent and self.parent.right == self
 
     def getStart(self):
-        bin_startID = self.__start/TEindex_BINSIZE
+        cdef int bin_startID = self.__start/TEindex_BINSIZE
         if self.__start == bin_startID * TEindex_BINSIZE :
              bin_startID -= 1
         return bin_startID
 
     def getEnd(self):
-        bin_endID = self.__end/TEindex_BINSIZE
+        cdef int bin_endID = self.__end/TEindex_BINSIZE
         return bin_endID
 
     def getName(self):
         return self.__name
 
-    def overlaps(self,start,end):
+    def overlaps(self,int start, int end):
         TEnamelist = []
+        cdef int s, name, e
         for s in sorted(self.__namelist.keys()) :
             if s > end :
                 break
@@ -91,14 +92,14 @@ class BinaryTree :
 
         @returns number of children: 0, 1, 2
         """
-        cnt = 0
+        cdef int cnt = 0
         if self.left:
             cnt += 1
         if self.right:
             cnt += 1
         return cnt
 
-    def insert(self,start,end,name):
+    def insert(self,int start,int end,int name):
         if self.root:
             self.__insert(self.root,start,end,name)
         else:
@@ -106,14 +107,14 @@ class BinaryTree :
             self.root.isroot  = True
         self.size = self.size + 1
 
-    def __insert(self, node, start,end,name):
+    def __insert(self, node, int start,int end,int name):
         """
         Insert new node with data
 
         @param data node data object to insert
         """
         root = node
-        binstart = start/TEindex_BINSIZE
+        cdef int binstart = start/TEindex_BINSIZE
         if start == binstart * TEindex_BINSIZE :
             binstart -= 1
 
@@ -208,12 +209,12 @@ class BinaryTree :
         oldRoot.balanceFactor = oldRoot.balanceFactor + 1 - min(newRoot.balanceFactor,0)
         newRoot.balanceFactor = newRoot.balanceFactor + 1 - max(oldRoot.balanceFactor,0)
     #range query
-    def lookup_r(self,start,end,node) :
+    def lookup_r(self,int start,int end,node) :
 
         if node is None :
             return (None,None)
 
-        node_start = node.getStart()
+        cdef int node_start = node.getStart()
         if end < node_start :
             return self.lookup_r(start,end,node.left)
 
@@ -230,7 +231,7 @@ class BinaryTree :
             return (self.lookup_p(start,node.left),node)
         return (None,None)
     #point query using start point
-    def lookup_p(self, start,node):
+    def lookup_p(self, int start,node):
         """
         Lookup node containing data
 
@@ -272,11 +273,12 @@ class TEfeatures:
     def getElements(self) :
          return self._elements
 
-    def getStrand(self,idx) :
+    def getStrand(self,int idx) :
         f_name = self._nameIDmap[idx]
         return f_name[len(f_name)-1]
 
-    def getEleName(self,idx) :
+    def getEleName(self,int idx) :
+        cdef int pos
         full_name = None
         if idx >= len(self._nameIDmap) or idx < 0 :
             return None
@@ -289,21 +291,21 @@ class TEfeatures:
         else :
             return None
 
-    def getFullName(self,idx) :
+    def getFullName(self,int idx) :
         if idx >= len(self._nameIDmap) or idx < 0 :
             return None
         else :
             return self._nameIDmap[idx]
 
-    def getLength(self,TE_name_idx) :
+    def getLength(self,int TE_name_idx) :
         if TE_name_idx < len(self._length) :
             return self._length[TE_name_idx]
         else :
             return -1
 
-    def getFamilyID(self,chr,start,end):
-        binID = start/TEindex_BINSIZE
-        endbinID = end/TEindex_BINSIZE + 1
+    def getFamilyID(self,chr,int start,int end):
+        cdef int binID = start/TEindex_BINSIZE
+        cdef int endbinID = end/TEindex_BINSIZE + 1
 
         if self.indexlist.has_key(chr) :
             index = self.indexlist[chr]
@@ -319,9 +321,9 @@ class TEfeatures:
 
             return None
 
-    def findOvpTE(self,chrom,start,end):
-        startbinID = start/TEindex_BINSIZE
-        endbinID = end/TEindex_BINSIZE
+    def findOvpTE(self,chrom,int start,int end):
+        cdef int startbinID = start/TEindex_BINSIZE
+        cdef int endbinID = end/TEindex_BINSIZE
         if start == startbinID * TEindex_BINSIZE :
            startbinID -= 1
         name_idx_list = []
@@ -344,6 +346,7 @@ class TEfeatures:
         return name_idx_list
 
     def TE_annotation(self,iv_seq):
+        cdef start, end
         TEs = []
         for iv in iv_seq :
             chromo = iv[0]
@@ -370,6 +373,7 @@ class TEfeatures:
         TEs = self.getElements()
         te_ele_counts = dict(zip(TEs,[0]*len(TEs)))
 
+        cdef int i
         for i in range(len(te_inst_counts)) :
             ele_name = self.getEleName(i)
 
@@ -404,7 +408,7 @@ class TEfeatures:
 #                sys.stderr.write("TE inconsistency! "+name+"\n")
 #                sys.exit(1)
 
-        return te_name_counts
+#        return te_name_counts
 
     def build (self,filename,te_mode):
             self.__srcfile = filename
@@ -415,8 +419,9 @@ class TEfeatures:
                 logging.error("cannot open such file %s !\n" %(self.__srcfile))
                 sys.exit(1)
 
-            name_idx = 0
-            linenum = 0
+            cdef int name_idx = 0
+            cdef int linenum = 0
+            cdef int i, bin_startID, bin_endID, start, end, end_pos, start_pos, tlen
             for line in f :
                 line = line.strip()
                 if line.startswith("#"):
@@ -496,7 +501,7 @@ class TEfeatures:
             f.close()
 
 
-
+'''
 if __name__ == '__main__':
     try:
 
@@ -505,3 +510,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.stderr.write("User interrupt !\n")
         sys.exit(0)
+'''

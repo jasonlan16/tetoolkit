@@ -21,8 +21,8 @@ import traceback
 import subprocess
 from time import time
 import pysam
-
-from TEToolkit.IO.ReadInputs import read_opts2
+sys.path.append(".")
+from TEToolkit.ReadInputs import read_opts2
 from TEToolkit.TEindex import *
 from TEToolkit.EMAlgorithm import *
 from TEToolkit.IntervalTree import *

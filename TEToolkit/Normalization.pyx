@@ -40,7 +40,8 @@ def normalize(method,treatment,tinput,control,cinput,species,prj_name) :
 
 def seq_depth(list1,list1input,list2,list2input):
     
-    max_size = 0.0
+    cdef float max_size = 0.0
+    cdef int i
     
     for i in range(len(list1)):
         tsmp = list1[i]
@@ -132,17 +133,17 @@ def __output_count_tbl(list1,list2, smp1,smp2, fname):
 #def bin_corr(list1,list2,chrlen_tbl):
 def bin_corr(list1,list1input,list2,list2input,species,prj_name):
     
-    tisize = len(list1input)
-    cisize = len(list2input)
-    tsize = len(list1) 
-    csize = len(list2) 
+    cdef int tisize = len(list1input)
+    cdef int cisize = len(list2input)
+    cdef int tsize = len(list1) 
+    cdef int csize = len(list2) 
     fnames = []
     
     #fnames2 = []
     sf1 = []
     sf2 = []
     
-    
+    cdef int i
     for i in range(tsize):
         fnames.append(list1[i].get_name())
         list1[i].read_in_bins(species) # read  tags of treatment samples into bins
@@ -181,8 +182,8 @@ def bin_corr(list1,list1input,list2,list2input,species,prj_name):
  #   refsmp = FloatVector(reads[0])
  #   robjects.globalenv['A'] = refsmp
    
-    min_sf_idx = 0
-    min_sf = 1.0
+    cdef int min_sf_idx = 0
+    cdef float min_sf = 1.0, msf
    
     __binCorr2r("bin_corr.r")
     
@@ -227,12 +228,13 @@ def bin_corr(list1,list1input,list2,list2input,species,prj_name):
 def join_bins(list1,list1input,list2,list2input,fnames,ref_idx):
     
     # only part of the background bins are used for computing normalization factors
-    fraction = 1.0 #0.75
+    cdef float fraction = 1.0 #0.75
     idx_merged = array('B') #use a bit array to reduce memory usage
     reads = [] #np.array(dtype='double')
     tot_reads = []
     sel_idx = []
     #init a bit array
+    cdef int i, j
     for i in range(MAX_BIT): 
         idx_merged.append(0x00)
         
